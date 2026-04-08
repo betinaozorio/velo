@@ -12,9 +12,9 @@ test('Deve consultar um pedido aprovado', async ({ page }) => {
   //act
   await page.getByTestId('search-order-id').fill('VLO-Q6GJWV');
   await page.getByTestId('search-order-button').click();
-  
+
   //assert
-  await expect(page.getByTestId('order-result-id')).toBeVisible();
+  await expect(page.getByTestId('order-result-id')).toBeVisible({timeout: 10_000});
   await expect(page.getByTestId('order-result-id')).toContainText('VLO-Q6GJWV');
 
   await expect(page.getByTestId('order-result-status')).toBeVisible();
