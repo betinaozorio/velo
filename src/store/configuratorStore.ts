@@ -34,6 +34,12 @@ export interface Order {
 
 export type ViewMode = 'exterior' | 'interior';
 
+type PersistedConfiguratorState = {
+  configuration?: {
+    optionals?: unknown;
+  };
+};
+
 interface ConfiguratorState {
   configuration: CarConfiguration;
   viewMode: ViewMode;
@@ -175,15 +181,16 @@ export const useConfiguratorStore = create<ConfiguratorState>()(
     {
       name: 'velo-configurator-storage',
       version: 2,
-      migrate: (persistedState: any) => {
-        if (persistedState?.configuration) {
-          const raw = persistedState.configuration.optionals;
+      migrate: (persistedState: unknown) => {
+        const state = persistedState as PersistedConfiguratorState;
+        if (state?.configuration) {
+          const raw = state.configuration.optionals;
           const optionals = Array.isArray(raw) ? raw : [];
-          persistedState.configuration.optionals = optionals.filter(
-            (opt: any) => typeof opt === 'string' && opt in (OPTIONAL_PRICES as Record<string, number>)
+          state.configuration.optionals = optionals.filter(
+            (opt): opt is string => typeof opt === 'string' && opt in (OPTIONAL_PRICES as Record<string, number>)
           );
         }
-        return persistedState;
+        return state;
       },
     }
   )
