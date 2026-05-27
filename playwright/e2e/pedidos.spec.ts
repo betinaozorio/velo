@@ -1,22 +1,31 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 import { generateOrderCode } from '../support/helpers'
+import { Navbar } from '../support/components/Navbar'
+import { LandingPage } from '../support/pages/LandingPage'
 import { OrderLockupPage, type OrderDetails } from '../support/pages/OrderLockupPage'
 
 /// AAA - Arrange, Act, Assert
 
 test.describe('Consulta de Pedido', () => {
+  let landingPage: LandingPage
+  let navbar: Navbar
+  let orderLockupPage: OrderLockupPage
 
   test.beforeEach(async ({ page }) => {
-    // Arrange
-    await page.goto('http://localhost:5173/')
-    await expect(page.getByTestId('hero-section').getByRole('heading')).toContainText('Velô Sprint')
+    landingPage = new LandingPage(page)
+    navbar = new Navbar(page)
+    
 
-    await page.getByRole('link', { name: 'Consultar Pedido' }).click()
-    await expect(page.getByRole('heading')).toContainText('Consultar Pedido')
+    await landingPage.open()
+    await landingPage.validateHeroSection()
+    await navbar.goToOrderLookup()
+
+    orderLockupPage = new OrderLockupPage(page)
+    await orderLockupPage.expectLoaded()
   })
 
-  test('deve consultar um pedido aprovado', async ({ page }) => {
+  test('deve consultar um pedido aprovado', async () => {
 
     // Test Data
     // `satisfies` valida o contrato de `OrderDetails` sem perder a inferencia do objeto literal.
@@ -33,7 +42,6 @@ test.describe('Consulta de Pedido', () => {
     } satisfies OrderDetails
 
     // Act  
-    const orderLockupPage = new OrderLockupPage(page)
     await orderLockupPage.searchOrder(order.number)
 
     // Assert
@@ -41,7 +49,7 @@ test.describe('Consulta de Pedido', () => {
 
   })
 
-  test('deve consultar um pedido reprovado', async ({ page }) => {
+  test('deve consultar um pedido reprovado', async () => {
 
     // Test Data
     const order = {
@@ -57,14 +65,13 @@ test.describe('Consulta de Pedido', () => {
     } satisfies OrderDetails
 
     // Act  
-    const orderLockupPage = new OrderLockupPage(page)
     await orderLockupPage.searchOrder(order.number)
 
     // Assert
     await orderLockupPage.validateOrderDetails(order)
   })
 
-  test('deve consultar um pedido em analise', async ({ page }) => {
+  test('deve consultar um pedido em analise', async () => {
 
     // Test Data
     const order = {
@@ -80,26 +87,23 @@ test.describe('Consulta de Pedido', () => {
     } satisfies OrderDetails
 
     // Act  
-    const orderLockupPage = new OrderLockupPage(page)
     await orderLockupPage.searchOrder(order.number)
 
     // Assert
     await orderLockupPage.validateOrderDetails(order)
   })
 
-  test('deve exibir mensagem quando o pedido não é encontrado', async ({ page }) => {
+  test('deve exibir mensagem quando o pedido não é encontrado', async () => {
 
     const order = generateOrderCode()
 
-    const orderLockupPage = new OrderLockupPage(page)
     await orderLockupPage.searchOrder(order)
     await orderLockupPage.validateOrderNotFound()
   })
 
-  test('deve exibir mensagem quando o código do pedido está fora do padrão', async ({ page }) => {
+  test('deve exibir mensagem quando o código do pedido está fora do padrão', async () => {
     const invalidOrderCode = '123456'
 
-    const orderLockupPage = new OrderLockupPage(page)
     await orderLockupPage.searchOrder(invalidOrderCode)
     await orderLockupPage.validateOrderNotFound()
   })
