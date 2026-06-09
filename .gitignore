@@ -31,3 +31,6 @@ dist-ssr
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+db-password.txt
+.playwright-mcp/
