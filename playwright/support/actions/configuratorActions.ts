@@ -51,7 +51,7 @@ export function createConfiguratorActions(page: Page) {
         .toHaveAttribute('aria-checked', 'false')
     },
     
-    async clickCheckout() {
+    async finishConfiguration() {
       await page.getByRole('button', { name: 'Monte o Seu' }).click()
     },
 
